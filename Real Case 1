@@ -1,0 +1,55 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+# --- Upload file di Google Colab ---
+from google.colab import files
+uploaded = files.upload()
+
+# --- Baca CSV ---
+df = pd.read_csv("kredit_motor.csv")
+print(df)
+
+# --- Fitur (X) dan Label (y) ---
+X = df[["Gaji", "Umur"]]
+y = df["Kredit_Lancar"]
+
+# --- Split train-test ---
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# --- Model Logistic Regression ---
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# --- Evaluasi ---
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+print("Akurasi:", acc)
+
+# --- Buat grid untuk decision boundary ---
+x_min, x_max = X["Gaji"].min() - 500000, X["Gaji"].max() + 500000
+y_min, y_max = X["Umur"].min() - 2, X["Umur"].max() + 2
+
+xx, yy = np.meshgrid(
+    np.arange(x_min, x_max, 50000),
+    np.arange(y_min, y_max, 1)
+)
+
+# Konversi grid ke DataFrame agar punya kolom yang sama
+grid = pd.DataFrame(np.c_[xx.ravel(), yy.ravel()], columns=["Gaji", "Umur"])
+
+# Prediksi grid
+Z = model.predict(grid)
+Z = Z.reshape(xx.shape)
+
+# --- Visualisasi ---
+plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.Paired)
+plt.scatter(X["Gaji"], X["Umur"], c=y, edgecolor="k", cmap=plt.cm.Paired)
+plt.xlabel("Gaji")
+plt.ylabel("Umur")
+plt.title(f"Prediksi Kredit Lancar\nAkurasi: {acc:.2f}")
+plt.colorbar(label="Kredit Lancar (1) / Tidak Lancar (0)")
+plt.show()
