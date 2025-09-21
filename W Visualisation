@@ -1,0 +1,52 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+from google.colab import files
+import pandas as pd
+
+# Upload file manual dari komputer
+uploaded = files.upload()
+
+# Membaca CSV setelah diupload
+df = pd.read_csv("coba.csv" , sep=";")
+print(df)
+
+# Baca dataset
+df = pd.read_csv("coba.csv", sep =";")  # pastikan file ada di folder yang sama
+
+# Fitur (X) dan Label (y)
+X = df[["UTS", "UAS"]]
+y = df["Lulus"]
+
+# Split train-test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model Logistic Regression
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Prediksi
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+print("Akurasi:", acc)
+
+# Visualisasi decision boundary
+x_min, x_max = X["UTS"].min() - 5, X["UTS"].max() + 5
+y_min, y_max = X["UAS"].min() - 5, X["UAS"].max() + 5
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 1),
+                     np.arange(y_min, y_max, 1))
+
+Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.Paired)
+plt.scatter(X["UTS"], X["UAS"], c=y, edgecolor="k", cmap=plt.cm.Paired)
+plt.xlabel("Nilai UTS")
+plt.ylabel("Nilai UAS")
+plt.title(f"Prediksi Kelulusan Mahasiswa\nAkurasi: {acc:.2f}")
+plt.colorbar(label="Lulus (1) / Tidak Lulus (0)")
+plt.show()
