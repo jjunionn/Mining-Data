@@ -1,0 +1,45 @@
+
+from google.colab import files
+import pandas as pd
+
+# Upload file manual dari komputer
+uploaded = files.upload()
+
+# Membaca CSV setelah diupload
+df = pd.read_csv("mahasiswa.csv")
+print(df)
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+# 1. Baca dataset dari CSV
+data = pd.read_csv("mahasiswa.csv")
+
+# 2. Tentukan fitur (X) dan label (y)
+X = data[["UTS", "UAS"]]   # input features
+y = data["Lulus"]          # target label
+
+# 3. Bagi data jadi training dan testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# 4. Buat model Decision Tree
+model = DecisionTreeClassifier()
+model.fit(X_train, y_train)
+
+# 5. Prediksi data testing
+y_pred = model.predict(X_test)
+
+# 6. Tampilkan hasil
+print("Data Testing:")
+print(X_test)
+print("\nPrediksi Kelulusan:", y_pred.tolist())
+print("Jawaban Sebenarnya:", y_test.tolist())
+
+data_baru = pd.DataFrame([[65, 70]], columns=["UTS", "UAS"])
+prediksi_baru = model.predict(data_baru)
+
+print("Prediksi mahasiswa baru (UTS=65, UAS=70):", 
+      "Lulus" if prediksi_baru[0]==1 else "Tidak Lulus")
+
