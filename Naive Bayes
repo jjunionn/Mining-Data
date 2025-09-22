@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report
+from google.colab import files
+
+# Upload file manual dari komputer
+uploaded = files.upload()
+
+# Membaca CSV setelah diupload
+df = pd.read_csv("mahasiswa.csv")
+print(df)
+
+# Pisahkan fitur dan label
+X = df[["UTS", "UAS"]]
+y = df["Lulus"]
+
+# Split 70:30
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Buat model Naive Bayes
+nb = GaussianNB()
+nb.fit(X_train, y_train)
+
+# Prediksi
+y_pred = nb.predict(X_test)
+
+# Evaluasi
+print("=== Naive Bayes ===")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+# ---------------------
+# Visualisasi Decision Boundary
+# ---------------------
+x_min, x_max = X["UTS"].min() - 5, X["UTS"].max() + 5
+y_min, y_max = X["UAS"].min() - 5, X["UAS"].max() + 5
+xx, yy = np.meshgrid(
+    np.arange(x_min, x_max, 1),
+    np.arange(y_min, y_max, 1)
+)
+
+# Perbaikan: pakai DataFrame dengan nama kolom sama
+grid_points = pd.DataFrame(np.c_[xx.ravel(), yy.ravel()], columns=["UTS", "UAS"])
+Z = nb.predict(grid_points)
+Z = Z.reshape(xx.shape)
+
+plt.figure(figsize=(8,6))
+plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.Paired)
+plt.scatter(X["UTS"], X["UAS"], c=y, edgecolor="k", cmap=plt.cm.Paired, s=80)
+plt.xlabel("Nilai UTS")
+plt.ylabel("Nilai UAS")
+plt.title("Decision Boundary - Naive Bayes")
+plt.colorbar(label="Lulus (1) / Tidak Lulus (0)")
+plt.show()
