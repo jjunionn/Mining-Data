@@ -1,0 +1,47 @@
+from os import read
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.decomposition import PCA
+from sklearn.tree import DecisionTreeClassifier
+from google.colab import files
+from sklearn.metrics import classification_report
+
+# Upload file manual dari komputer
+uploaded = files.upload()
+
+# ==== PILIH ALGORITMA ====
+model = DecisionTreeClassifier(random_state=42)
+
+df = pd.read_csv("jantung.csv" , sep = ";")
+print(df.head())
+
+X = df[["Usia", "Tekanan_Darah" , "Kolestrol", "Detak_Jantung", "Aktivitas_fisik"]]
+y = df["Risiko_Jantung"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+print("\n=== Evaluasi Model ===")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred, zero_division=0))
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+y_numeric = (y == "Ya").astype(int)
+
+plt.figure(figsize=(8,6))
+plt.scatter(X_pca[:,0], X_pca[:,1], c=y_numeric, cmap=plt.cm.Paired, edgecolor="k", s=80)
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.title(f"Visualisasi PCA - {type(model).__name__}")
+plt.colorbar(label="Risiko_Jantung (1=Ya, 0=Tidak)")
+plt.show()
