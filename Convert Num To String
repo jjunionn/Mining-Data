@@ -1,0 +1,14 @@
+from sklearn.preprocessing import LabelEncoder
+
+# ==== LOAD DATA ====
+df = pd.read_csv("loan.csv", sep=",")
+
+# Encode kolom kategorikal
+le = LabelEncoder()
+df["Pekerjaan"] = le.fit_transform(df["Pekerjaan"])
+
+print(df.head())
+
+# Fitur (X) pakai semua kolom numerik (setelah encoding)
+X = df[["Penghasilan", "Pekerjaan", "Umur"]]
+y = df["Pinjaman_Disetuju"]
